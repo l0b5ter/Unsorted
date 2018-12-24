@@ -1,0 +1,95 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using System.Windows.Forms;
+
+namespace WindowsFormsApp3
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+            listBox1.SelectionMode = SelectionMode.MultiExtended;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog FBD = new FolderBrowserDialog();
+            FBD.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+            if (FBD.ShowDialog() == DialogResult.OK)
+            {
+                listBox1.Items.Clear();
+                string[] files = Directory.GetFiles(FBD.SelectedPath);
+                string[] dirs = Directory.GetDirectories(FBD.SelectedPath);
+
+                foreach(string file in files)
+                {
+                    listBox1.Items.Add(Path.GetFileName(file));
+                }
+                foreach (string dir in dirs)
+                {
+                    listBox1.Items.Add(Path.GetFileName(dir));
+                }
+                button2.Visible = true;
+                button3.Visible = true;
+                listBox1.Visible = true;
+                for (int val = 0; val < listBox1.Items.Count;)
+                {
+                    val++;
+                    label1.Text = "          ....." + val.ToString() + " files found.....";
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            saveFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*"; // or just "txt files (*.txt)|*.txt" if you only want to save text files
+            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                using (StreamWriter writer = new StreamWriter(saveFileDialog1.FileName))
+                {
+                    int listBox1Counter = 0;
+                    while (listBox1.Items.Count > listBox1Counter)
+                    {
+                        writer.WriteLine(listBox1.Items[listBox1Counter]);
+                        listBox1Counter++;
+                    }
+                    writer.Close();
+                }
+            }
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(string.Join(Environment.NewLine, listBox1.Items.OfType<string>().ToArray()));
+            for (int val = 0; val < listBox1.Items.Count; val++)
+            {
+                listBox1.SetSelected(val, true);
+            }
+        }
+
+        private void CloseApp_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void Mini_Click(object sender, EventArgs e)
+        {
+            WindowState = FormWindowState.Minimized;
+        }
+    }
+}
